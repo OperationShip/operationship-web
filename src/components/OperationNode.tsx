@@ -3,17 +3,19 @@ import { Handle, Position } from 'reactflow';
 import { Lock, Target, Plus } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useStore } from '../store/useStore'; // 1. ADD THIS IMPORT
 
-// Helper to merge Tailwind classes cleanly
 export function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
 }
 
 export default function OperationNode({ data, id }: any) {
+  const targetNode = useStore((state) => state.targetNode); // 2. GET THE ACTION
+  
   const isGhost = data.status === 'ghost';
-  // Simulate Stripe check: if node needs 'pro', lock it (we'll assume free tier for now)
   const isLocked = data.tierRequired === 'pro'; 
   const hasMetrics = !!data.metrics;
+  const isUnitEconomicsOn = useStore((state) => state.isUnitEconomicsOn); // 3. LISTEN TO TOGGLE
 
   return (
     <div className={cn(
@@ -22,10 +24,8 @@ export default function OperationNode({ data, id }: any) {
       data.isSelected ? "ring-2 ring-operation-accent shadow-[0_0_20px_rgba(59,130,246,0.2)]" : ""
     )}>
       
-      {/* Top Connection Point */}
       <Handle type="target" position={Position.Top} className="w-3 h-3 bg-gray-600 border-2 border-operation-dark" />
 
-      {/* Header Area */}
       <div className="flex justify-between items-start mb-2">
         <div className="flex items-center gap-2">
           {isLocked ? (
@@ -38,8 +38,9 @@ export default function OperationNode({ data, id }: any) {
           </h3>
         </div>
 
-        {/* @Mention Target Button */}
+        {/* 4. ADD THE ONCLICK EVENT HERE */}
         <button 
+          onClick={() => targetNode(id)}
           className={cn(
             "p-1.5 rounded-lg transition-colors cursor-pointer z-10",
             data.isSelected ? "bg-operation-accent text-white" : "bg-operation-dark border border-operation-border text-gray-400 hover:text-white"
@@ -50,13 +51,12 @@ export default function OperationNode({ data, id }: any) {
         </button>
       </div>
 
-      {/* Main Paragraph */}
       <p className={cn("text-xs leading-relaxed", isGhost ? "text-gray-500" : "text-gray-400")}>
         {isLocked ? "Upgrade to Pro to view operational mechanics, hidden costs, and automation strategies." : data.description}
       </p>
 
-      {/* Unit Economics Dropdown (Appears only if Toggle is ON and Data exists) */}
-      {hasMetrics && !isLocked && (
+      {/* 5. ONLY SHOW METRICS IF TOGGLE IS ON */}
+      {hasMetrics && !isLocked && isUnitEconomicsOn && (
         <div className="mt-4 pt-3 border-t border-operation-border flex justify-between items-center">
           <div>
             <span className="text-[10px] uppercase tracking-wider text-gray-500 block mb-0.5">Monthly Cost</span>
@@ -74,14 +74,12 @@ export default function OperationNode({ data, id }: any) {
         </div>
       )}
 
-      {/* Ghost Node Reject Button (Top Right Floating) */}
       {isGhost && (
         <button className="absolute -top-3 -right-3 bg-operation-dark border border-operation-border text-gray-400 hover:text-operation-danger rounded-full p-1.5 shadow-lg transition-colors z-10">
           <Plus size={14} className="rotate-45" />
         </button>
       )}
 
-      {/* Bottom Connection Point */}
       <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-operation-accent border-2 border-operation-dark" />
     </div>
   );
