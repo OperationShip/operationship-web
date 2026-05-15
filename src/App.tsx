@@ -81,13 +81,21 @@ export default function App() {
             </button>
             <input 
               type="text" 
-              placeholder="E.g., Design a subscription model for local coffee beans..."
-              className="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder-gray-500 py-3"
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
+              placeholder={useStore(s => s.isGenerating) ? "Architect is simulating..." : "E.g., Design a subscription model for local coffee beans..."}
+              className="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder-gray-500 py-3 disabled:opacity-50"
+              value={useStore(s => s.chatInput)}
+              onChange={(e) => useStore.getState().setChatInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') useStore.getState().submitCommand();
+              }}
+              disabled={useStore(s => s.isGenerating)}
             />
-            <button className="bg-white text-black p-2.5 rounded-xl hover:bg-gray-200 transition flex items-center justify-center">
-              <Send size={18} />
+            <button 
+              onClick={() => useStore.getState().submitCommand()}
+              disabled={useStore(s => s.isGenerating)}
+              className="bg-white text-black p-2.5 rounded-xl hover:bg-gray-200 transition flex items-center justify-center disabled:opacity-50"
+            >
+              <Send size={18} className={useStore(s => s.isGenerating) ? "animate-pulse" : ""} />
             </button>
           </div>
         </div>
