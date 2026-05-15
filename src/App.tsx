@@ -10,7 +10,8 @@ export default function App() {
     nodes, edges, onNodesChange, onEdgesChange,
     chatInput, setChatInput,
     isAiPanelOpen, toggleAiPanel,
-    isUnitEconomicsOn, toggleUnitEconomics 
+    isUnitEconomicsOn, toggleUnitEconomics,
+    isGenerating, submitCommand
   } = useStore();
 
   const nodeTypes = useMemo(() => ({ operationNode: OperationNode }), []);
@@ -81,21 +82,21 @@ export default function App() {
             </button>
             <input 
               type="text" 
-              placeholder={useStore(s => s.isGenerating) ? "Architect is simulating..." : "E.g., Design a subscription model for local coffee beans..."}
+              placeholder={isGenerating ? "Architect is simulating..." : "E.g., Design a subscription model for local coffee beans..."}
               className="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder-gray-500 py-3 disabled:opacity-50"
-              value={useStore(s => s.chatInput)}
-              onChange={(e) => useStore.getState().setChatInput(e.target.value)}
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') useStore.getState().submitCommand();
+                if (e.key === 'Enter') submitCommand();
               }}
-              disabled={useStore(s => s.isGenerating)}
+              disabled={isGenerating}
             />
             <button 
-              onClick={() => useStore.getState().submitCommand()}
-              disabled={useStore(s => s.isGenerating)}
+              onClick={() => submitCommand()}
+              disabled={isGenerating}
               className="bg-white text-black p-2.5 rounded-xl hover:bg-gray-200 transition flex items-center justify-center disabled:opacity-50"
             >
-              <Send size={18} className={useStore(s => s.isGenerating) ? "animate-pulse" : ""} />
+              <Send size={18} className={isGenerating ? "animate-pulse" : ""} />
             </button>
           </div>
         </div>
@@ -104,4 +105,3 @@ export default function App() {
     </div>
   );
 }
-
